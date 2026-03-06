@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="robots" content="noindex, nofollow">
+    <title>System Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/theme.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e1b4b 100%);
+        }
+
+        .phone-screen.dark-screen {
+            background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .app-inner.dark-inner {
+            background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .container.dark-card {
+            background: rgba(15, 23, 42, 0.97);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        /* Tab switcher */
+        .tab-bar {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.55rem 0;
+            border-radius: 9px;
+            border: none;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--text-muted);
+            min-height: unset;
+            box-shadow: none;
+            letter-spacing: 0.02em;
+        }
+
+        .tab-btn.active {
+            background: #f97316;
+            color: white;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
+        }
+
+        .tab-btn:hover:not(.active):not(:disabled) {
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.06);
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Admin logo */
+        .admin-shield {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+
+        .container h1 {
+            background: linear-gradient(135deg, #f97316, #dc2626);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Dark inputs */
+        .dark-input {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+
+        .dark-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .dark-input:focus {
+            border-color: #f97316 !important;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15) !important;
+            background: #1e293b !important;
+        }
+
+        /* Submit button */
+        .admin-btn {
+            background: linear-gradient(135deg, #ea580c, #dc2626) !important;
+            box-shadow: 0 4px 16px rgba(234, 88, 12, 0.4) !important;
+            border: none !important;
+        }
+
+        .admin-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #f97316, #ef4444) !important;
+            box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5) !important;
+        }
+
+        /* Locked register notice */
+        .locked-notice {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .locked-notice .lock-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .locked-notice p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .locked-notice small {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            margin-top: 6px;
+        }
+
+        /* Security badge */
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(249, 115, 22, 0.08);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 1.1rem;
+            font-size: 0.78rem;
+            color: #fb923c;
+            font-weight: 600;
+        }
+
+        label.dark-label {
+            color: var(--text-muted);
+        }
+
+        .error-box {
+            margin-top: 0.9rem;
+            text-align: center;
+            padding: 0.65rem;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .success-box {
+            margin-top: 0.9rem;
+            text-align: center;
+            padding: 0.65rem;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .phone-label h2 {
+            background: linear-gradient(to right, #fff, #f97316);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="phone-shell">
+        <div class="phone-notch"></div>
+        <div class="phone-screen dark-screen">
+            <div class="status-bar">
+                <span class="status-time" style="color:#94a3b8;">9:41</span>
+                <div class="status-icons" style="color:#94a3b8;">
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
+                        <rect x="0" y="3" width="3" height="9" rx="1" />
+                        <rect x="4.5" y="1.5" width="3" height="10.5" rx="1" />
+                        <rect x="9" y="0" width="3" height="12" rx="1" />
+                    </svg>
+                    <svg width="16" height="12" viewBox="0 0 24 12" fill="currentColor">
+                        <rect x="0" y="1" width="20" height="10" rx="2" stroke="currentColor" stroke-width="1.5"
+                            fill="none" />
+                        <rect x="1.5" y="2.5" width="14" height="7" rx="1" />
+                        <rect x="21" y="4" width="2" height="4" rx="1" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="app-scroll">
+                <div class="app-inner dark-inner">
+                    <div class="container dark-card">
+
+                        <!-- Logo -->
+                        <div class="app-logo">
+                            <div class="admin-shield">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"
+                                        fill="#f97316" opacity="0.9" />
+                                    <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="app-logo-name" style="color:#f97316;">Admin Portal</div>
+                                <div
+                                    style="font-size:0.6rem;color:var(--text-muted);text-align:center;letter-spacing:0.06em;text-transform:uppercase;">
+                                    Restricted Access</div>
+                            </div>
+                        </div>
+
+                        <!-- Tab bar (Login / Register) -->
+                        <div class="tab-bar">
+                            <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+                            <button class="tab-btn" id="tabRegister"
+                                onclick="window.location.href='institution-signup.html'">Register School</button>
+                        </div>
+
+                        <!-- ====== LOGIN PANEL ====== -->
+                        <div id="panelLogin">
+                            <h1 style="font-size:1.5rem;">Admin Sign In</h1>
+                            <p class="subtitle" style="color:var(--text-muted);margin-bottom:1.1rem;">Authorised
+                                personnel only
+                            </p>
+
+
+
+                            <form id="loginForm">
+                                <div class="form-group">
+                                    <label class="dark-label">Institution ID</label>
+                                    <input class="dark-input" type="number" id="loginInstId" required
+                                        placeholder="Enter school id">
+                                </div>
+                                <div class="form-group">
+                                    <label class="dark-label">Email</label>
+                                    <input class="dark-input" type="email" id="loginEmail" required
+                                        placeholder="admin@email.com" autocomplete="email">
+                                </div>
+                                <div class="form-group">
+                                    <label class="dark-label">Password</label>
+                                    <div style="position:relative;">
+                                        <input class="dark-input" type="password" id="loginPassword" required
+                                            placeholder="••••••••" autocomplete="current-password">
+                                        <button type="button" onclick="togglePwd('loginPassword',this)"
+                                            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;width:28px;height:28px;min-height:unset;padding:0;box-shadow:none;border:none;color:var(--text-muted);font-size:0.95rem;cursor:pointer;">👁</button>
+                                    </div>
+                                </div>
+
+                                <button type="submit" id="loginBtn" class="admin-btn" style="margin-top:0.65rem;">🔐
+                                    Access Dashboard</button>
+                            </form>
+
+                            <div id="loginMsg" class="hidden"></div>
+                        </div>
+
+                        <!-- ====== REGISTER PANEL ====== -->
+                        <div id="panelRegister" class="hidden">
+                            <h1 style="font-size:1.5rem;">Admin Setup</h1>
+                            <p class="subtitle" style="color:var(--text-muted);margin-bottom:1rem;">Create the admin
+                                account
+                                (one-time only)</p>
+
+                            <!-- Locked state — shown after admin is registered -->
+                            <div id="registrationLocked" class="locked-notice hidden">
+                                <div class="lock-icon">🔒</div>
+                                <p>Admin account already exists.<br>No further admin registrations are allowed.</p>
+                                <small>Contact your system administrator if you need access.</small>
+                            </div>
+
+                            <!-- Register form — shown only on first setup -->
+                            <div id="registerFormWrap">
+                                <div class="security-badge">
+                                    ⚠️ One-time setup — cannot be undone
+                                </div>
+                                <form id="registerForm">
+                                    <div class="form-group">
+                                        <label class="dark-label">Admin Email</label>
+                                        <input class="dark-input" type="email" id="regEmail" required
+                                            placeholder="admin@email.com" autocomplete="email">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="dark-label">Password</label>
+                                        <div style="position:relative;">
+                                            <input class="dark-input" type="password" id="regPassword" required
+                                                placeholder="Min. 8 characters" autocomplete="new-password">
+                                            <button type="button" onclick="togglePwd('regPassword',this)"
+                                                style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;width:28px;height:28px;min-height:unset;padding:0;box-shadow:none;border:none;color:var(--text-muted);font-size:0.95rem;cursor:pointer;">👁</button>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" id="regBtn" class="admin-btn" style="margin-top:0.65rem;">✓
+                                        Create Admin Account</button>
+                                </form>
+                            </div>
+
+                            <div id="regMsg" class="hidden"></div>
+                        </div>
+
+                        <div
+                            style="text-align:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);">
+                            <a href="index.html"
+                                style="font-size:0.74rem;color:var(--text-muted);text-decoration:none;">← Back to
+                                Student Login</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop side label -->
+    <div class="phone-label">
+        <div class="phone-label-badge" style="border-color:rgba(249,115,22,0.3);color:#f97316;">🛡️ Admin Only</div>
+        <h2>Secure<br>Admin<br>Portal</h2>
+        <p>Sign in with your admin credentials. First-time setup creates the admin account — which can
+            only be done once.</p>
+        <div class="phone-label-badge" style="margin-top:8px;border-color:rgba(239,68,68,0.3);color:#f87171;">🔒
+            Restricted</div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+
+
+        const ADMIN_REGISTERED_KEY = 'adminAccountCreated';
+        let loginAttempts = 0;
+        let lockoutUntil = null;
+
+        // ---- Tab switching ----
+        function switchTab(tab) {
+            document.getElementById('panelLogin').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('panelRegister').classList.toggle('hidden', tab !== 'register');
+            document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+            document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+            clearMsgs();
+
+            if (tab === 'register') {
+                checkRegistrationLocked();
+            }
+        }
+
+        function clearMsgs() {
+            ['loginMsg', 'regMsg'].forEach(id => {
+                const el = document.getElementById(id);
+                el.textContent = '';
+                el.className = 'hidden';
+            });
+        }
+
+        // ---- Show if registration is already done ----
+        function checkRegistrationLocked() {
+            const locked = localStorage.getItem(ADMIN_REGISTERED_KEY) === 'true';
+            document.getElementById('registrationLocked').classList.toggle('hidden', !locked);
+            document.getElementById('registerFormWrap').classList.toggle('hidden', locked);
+        }
+
+        // ---- Password toggle ----
+        function togglePwd(id, btn) {
+            const input = document.getElementById(id);
+            input.type = input.type === 'password' ? 'text' : 'password';
+            btn.textContent = input.type === 'password' ? '👁' : '🙈';
+        }
+
+        // ---- Show message ----
+        function showMsg(id, text, type = 'error') {
+            const el = document.getElementById(id);
+            el.textContent = text;
+            el.className = type === 'error' ? 'error-box' : 'success-box';
+        }
+
+        // ============ LOGIN FORM ============
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Lockout check
+            if (lockoutUntil && Date.now() < lockoutUntil) {
+                const secs = Math.ceil((lockoutUntil - Date.now()) / 1000);
+                showMsg('loginMsg', `🚫 Too many attempts. Wait ${secs}s.`);
+                return;
+            }
+
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const institution_id = document.getElementById('loginInstId').value.trim();
+
+            // 2. Backend verify
+            const result = await API.login({ email, password, institution_id });
+
+            if (result.status === 'success') {
+                const user = result.data;
+
+                // 3. Role check
+                if (user.role !== 'admin') {
+                    showMsg('loginMsg', '🚫 This account is not an admin.');
+                    btn.disabled = false;
+                    btn.innerHTML = '🔐 Access Dashboard';
+                    return;
+                }
+
+                loginAttempts = 0;
+                localStorage.setItem('user', JSON.stringify(user));
+                window.location.href = 'dashboard.html';
+
+            } else {
+                loginAttempts++;
+                showMsg('loginMsg', '❌ ' + (result.message || 'Invalid email or password.'));
+                btn.disabled = false;
+                btn.innerHTML = '🔐 Access Dashboard';
+            }
+        });
+
+        // ============ REGISTER FORM ============
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = document.getElementById('regBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating admin...';
+
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            // 1. Check if admin already registered
+            if (localStorage.getItem(ADMIN_REGISTERED_KEY) === 'true') {
+                showMsg('regMsg', '🚫 Admin account already exists. Registration is locked.');
+                btn.disabled = false;
+                btn.textContent = '✓ Create Admin Account';
+                checkRegistrationLocked();
+                return;
+            }
+
+
+
+            // 3. Password length
+            if (password.length < 6) {
+                showMsg('regMsg', '❌ Password must be at least 6 characters.');
+                btn.disabled = false;
+                btn.textContent = '✓ Create Admin Account';
+                return;
+            }
+
+            // 4. Register with backend as admin
+            const result = await API.register({ email, password, role: 'admin' });
+
+            if (result.status === 'success') {
+                // Lock registration permanently
+                localStorage.setItem(ADMIN_REGISTERED_KEY, 'true');
+                showMsg('regMsg', '✅ Admin account created! You can now sign in.', 'success');
+                setTimeout(() => switchTab('login'), 2000);
+            } else {
+                showMsg('regMsg', '❌ ' + (result.message || 'Registration failed.'));
+                btn.disabled = false;
+                btn.textContent = '✓ Create Admin Account';
+            }
+        });
+
+        // Redirection removed to allow access to setup/login page even if logged in
+
+    </script>
+</body>
+
+</html>

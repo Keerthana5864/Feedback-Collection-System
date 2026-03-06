@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Architecture & System Design</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --secondary: #f43f5e;
+            --dark: #0f172a;
+            --darkER: #020617;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--darkER);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(244, 63, 94, 0.1) 0%, transparent 40%);
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header Section */
+        header {
+            padding: 80px 0 40px;
+            text-align: center;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 48px;
+            font-weight: 300;
+        }
+
+        /* Hero Image/Mockup Area */
+        .presentation-hero {
+            position: relative;
+            padding: 40px 0;
+            display: flex;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .hero-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+            animation: cardFloat 6s ease-in-out infinite;
+        }
+
+        /* Feature Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 80px 0;
+        }
+
+        .feature-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 32px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .feature-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .feature-box:hover::before {
+            opacity: 1;
+        }
+
+        .icon-circle {
+            width: 56px;
+            height: 56px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .feature-box h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .feature-box p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Architecture Section */
+        .arch-section {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 32px;
+            padding: 60px;
+            margin: 100px 0;
+            border: 1px solid var(--glass-border);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .arch-diagram {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            position: relative;
+        }
+
+        .arch-step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .arch-circle {
+            width: 100px;
+            height: 100px;
+            background: var(--dark);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+            font-size: 2rem;
+        }
+
+        .arch-line {
+            position: absolute;
+            top: 50px;
+            left: 100px;
+            right: 100px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+            z-index: 1;
+        }
+
+        /* Tech Stack */
+        .tech-chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 40px;
+        }
+
+        .tech-chip {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tech-chip span {
+            color: var(--primary-light);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        /* Buttons */
+        .cta-group {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 60px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            padding: 16px 40px;
+            border-radius: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid var(--glass-border);
+            transition: 0.3s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #fff;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes cardFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotateX(2deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotateX(0deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .arch-diagram {
+                grid-template-columns: 1fr;
+            }
+
+            .arch-line {
+                display: none;
+            }
+
+            .arch-section {
+                padding: 40px 20px;
+            }
+
+            .cta-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Main Header -->
+        <header>
+            <div class="badge">Technical Briefing</div>
+            <h1>The Next Generation<br>Feedback Ecosystem</h1>
+            <p class="subtitle">A secure, multi-tenant SaaS platform built for modern educational institutions, focusing
+                on data isolation, real-time analytics, and native mobile experiences.</p>
+        </header>
+
+        <!-- Dynamic Card Showcasing Core Concept -->
+        <section class="presentation-hero">
+            <div class="hero-card">
+                <div style="font-size: 3.5rem; margin-bottom: 24px;">🌐</div>
+                <h2 style="font-size: 2rem; margin-bottom: 16px;">Multi-Tenant SaaS Architecture</h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+                    One platform, infinite possibilities. Every institution operates in its own secure data bubble,
+                    isolated by unique identifiers at the database core.
+                </p>
+
+                <div class="tech-chips">
+                    <div class="tech-chip"><span>Backend</span> Flask (Python)</div>
+                    <div class="tech-chip"><span>Identity</span> JWT & Scoped Auth</div>
+                    <div class="tech-chip"><span>DB</span> Supabase PostgreSQL</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Pillars Grid -->
+        <section class="features-grid">
+            <!-- Pillar 1 -->
+            <div class="feature-box">
+                <div class="icon-circle">🛡️</div>
+                <h3>Military-Grade Isolation</h3>
+                <p>Data partitioning at the row level ensures "School A" never intersects with "School B," providing
+                    enterprise-level security.</p>
+            </div>
+            <!-- Pillar 2 -->
+            <div class="feature-box">
+                <div class="icon-circle">📱</div>
+                <h3>PWA / Mobile Native</h3>
+                <p>Built as a Progressive Web App. Install it once, receive updates automatically, and enjoy a
+                    full-screen mobile experience.</p>
+            </div>
+            <!-- Pillar 3 -->
+            <div class="feature-box">
+                <div class="icon-circle">📊</div>
+                <h3>Real-Time Analytics</h3>
+                <p>Interactive Chart.js visualizations provide admins with instant insights into faculty performance and
+                    student satisfaction.</p>
+            </div>
+        </section>
+
+        <!-- System Architecture Visualization -->
+        <section class="arch-section">
+            <div class="section-header">
+                <h2>Technical Flow</h2>
+                <p style="color: var(--text-muted);">How a feedback submission travels through our secure stack.</p>
+            </div>
+
+            <div class="arch-diagram">
+                <div class="arch-line"></div>
+
+                <div class="arch-step">
+                    <div class="arch-circle">📲</div>
+                    <h3>Edge Logic</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">PWA Frontend captures
+                        feedback with verified Institution ID.</p>
+                </div>
+
+                <div class="arch-step">
+                    <div class="arch-circle">⛓️</div>
+                    <h3>API Security</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Flask Backend validates
+                        tenant scope before processing data.</p>
+                </div>
+
+                <div class="arch-step">
+                    <div class="arch-circle">💾</div>
+                    <h3>Cloud Core</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Supabase persists data in
+                        encrypted, tenant-isolated tables.</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 60px;">
+                <h3 style="margin-bottom: 24px;">The Tech Stack</h3>
+                <div class="tech-chips">
+                    <div class="tech-chip">Python 3.x</div>
+                    <div class="tech-chip">Flask API</div>
+                    <div class="tech-chip">Supabase / PostgreSQL</div>
+                    <div class="tech-chip">Chart.js</div>
+                    <div class="tech-chip">Vanilla JS & CSS3</div>
+                    <div class="tech-chip">Service Workers</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <div class="cta-group">
+            <a href="index.html" class="btn-primary">Launch Live Application</a>
+            <a href="institution-signup.html" class="btn-outline">Register New School</a>
+        </div>
+
+        <footer style="margin: 100px 0 60px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+            &copy; 2026 Faculty Feedback Platform | Next-Gen Multi-Tenant Platform
+        </footer>
+    </div>
+</body>
+
+</html>

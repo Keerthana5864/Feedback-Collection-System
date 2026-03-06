@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Admin Dashboard - Feedback System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #64748b;
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --error: #ef4444;
+            --success: #10b981;
+            --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+            /* Local overrides that should change with theme */
+            --bg-body: var(--bg-main);
+            --bg-card: var(--card-bg);
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --border: #334155;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            background: var(--bg-body);
+            color: var(--text-main);
+            align-items: flex-start;
+            padding: 28px 40px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 280px;
+            background: #1e293b;
+            color: white;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            transform: translateX(0%);
+        }
+
+        .sidebar h2 {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            color: #f8fafc;
+        }
+
+        .nav-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            font-size: 1rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-item span {
+            flex: 1;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.2;
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .mobile-menu-btn:hover {
+            background: #f8fafc;
+            transform: scale(1.05);
+        }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            z-index: 150;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            flex: 1;
+            min-height: 0;
+            padding: 16px;
+            padding-bottom: 16px;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .chart-card,
+        .stat-card,
+        .table-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .chart-card h3,
+        .stat-card h3,
+        .table-section h3 {
+            color: var(--text-main);
+        }
+
+        /* Dark Mode Toggle Switch */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--bg-card);
+            padding: 10px 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            width: fit-content;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        .logout-sidebar {
+            margin-top: auto;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 5, 0.2);
+        }
+
+        .logout-sidebar:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-badge {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .main-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-card h3 {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .chart-wrapper {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .table-section {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-top: 25px;
+        }
+
+        .logout-btn-dash {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            width: auto;
+            padding: 10px 20px;
+            box-shadow: none;
+        }
+
+        .logout-btn-dash:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Notification / Alert Styles */
+        .notif-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 1px 7px;
+            margin-left: auto;
+            display: none;
+        }
+
+        .notif-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .notif-panel h4 {
+            font-size: 1rem;
+            margin: 0 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notif-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+            animation: fadeIn 0.4s ease;
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .notif-icon.green {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .notif-icon.red {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .notif-icon.orange {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .notif-body {
+            flex: 1;
+        }
+
+        .notif-body strong {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .notif-body span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .notif-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .notif-item.clickable {
+            cursor: pointer;
+            transition: background 0.15s;
+            border-radius: 10px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+        .notif-item.clickable:hover {
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        @keyframes highlightRow {
+            0% {
+                background: rgba(254, 249, 195, 0.2);
+            }
+
+            70% {
+                background: rgba(254, 249, 195, 0.2);
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+
+        .row-highlight>td {
+            animation: highlightRow 2.2s ease forwards;
+        }
+
+        /* Overview extras */
+        .stats-grid-6 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+            padding: 0 10px 12px;
+        }
+
+        /* Hide scrollbar by default, show on hover/scroll */
+        .stats-grid-6::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .stats-grid-6::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .stat-card-v2 {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .stat-card-v2 .icon-box {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .stat-card-v2 .meta {
+            flex: 1;
+        }
+
+        .stat-card-v2 .meta small {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-weight: 600;
+        }
+
+        .stat-card-v2 .meta .big {
+            font-size: 1.25rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-top: 2px;
+        }
+
+        .overview-grid2 {
+            display: flex;
+            overflow-x: auto;
+            gap: 16px;
+            padding-bottom: 12px;
+            scroll-snap-type: x mandatory;
+        }
+
+        .overview-grid2>.notif-panel {
+            flex: 0 0 280px;
+            /* Comfortable width for leaderboard/activity */
+            scroll-snap-align: start;
+            margin-bottom: 0;
+        }
+
+        .overview-grid2::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .overview-grid2::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .mini-table th {
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .mini-table td {
+            padding: 11px 10px;
+            font-size: 0.88rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mini-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .bottom-nav {
+            z-index: 1000 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone-shell">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+            <div class="status-bar">
+                <span class="status-time">9:41</span>
+                <div class="status-icons">
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
+                        <rect x="0" y="3" width="3" height="9" rx="1" />
+                        <rect x="4.5" y="1.5" width="3" height="10.5" rx="1" />
+                        <rect x="9" y="0" width="3" height="12" rx="1" />
+                    </svg>
+                    <svg width="16" height="12" viewBox="0 0 24 12" fill="currentColor">
+                        <rect x="0" y="1" width="20" height="10" rx="2" stroke="currentColor" stroke-width="1.5"
+                            fill="none" />
+                        <rect x="1.5" y="2.5" width="14" height="7" rx="1" />
+                        <rect x="21" y="4" width="2" height="4" rx="1" />
+                    </svg>
+                </div>
+            </div>
+            <div class="dashboard-container">
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+
+                <!-- Sidebar Overlay -->
+                <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+                <!-- Sidebar Navigation -->
+                <div class="sidebar">
+
+                    <!-- Logo -->
+                    <div
+                        style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.08);">
+                        <svg width="58" height="58" viewBox="0 0 44 44" fill="none"
+                            style="filter:drop-shadow(0 4px 14px rgba(99,102,241,0.6));">
+                            <defs>
+                                <linearGradient id="logoGrad" x1="0" y1="0" x2="44" y2="44"
+                                    gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#6366f1" />
+                                    <stop offset="100%" stop-color="#4f46e5" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Background -->
+                            <rect width="44" height="44" rx="12" fill="url(#logoGrad)" />
+                            <!-- Graduation cap flat top (mortarboard) -->
+                            <polygon points="22,10 36,17 22,24 8,17" fill="white" opacity="0.95" />
+                            <!-- Cap body / tassel base -->
+                            <rect x="19" y="24" width="6" height="2" rx="1" fill="white" opacity="0.8" />
+                            <!-- Left side of cap hanging down -->
+                            <path d="M12 18.5v6c0 2.5 4.5 5 10 5s10-2.5 10-5v-6" stroke="white" stroke-width="2"
+                                fill="none" stroke-linecap="round" />
+                            <!-- Tassel line -->
+                            <line x1="36" y1="17" x2="36" y2="24" stroke="white" stroke-width="2" stroke-linecap="round"
+                                opacity="0.8" />
+                            <circle cx="36" cy="25.5" r="1.8" fill="white" opacity="0.8" />
+                            <!-- Star (bottom right badge) -->
+                            <circle cx="33" cy="33" r="7" fill="#fbbf24" />
+                            <path d="M33 28.5l1.2 3.6h3.8l-3 2.2 1.1 3.4-3.1-2.2-3.1 2.2 1.1-3.4-3-2.2h3.8z"
+                                fill="white" />
+                        </svg>
+                        <div style="text-align:center;line-height:1.3;">
+                            Faculty Feedback</div>
+                        <div
+                            style="font-size:0.58rem;color:#64748b;letter-spacing:0.07em;text-transform:uppercase;margin-top:1px;">
+                            Admin Panel</div>
+                    </div>
+
+                    <div class="nav-item active" data-tab="overview">📊 <span>Dashboard Overview</span></div>
+                    <div class="nav-item" data-tab="analytics">📈 <span>Visual Analytics</span></div>
+                    <div class="nav-item" data-tab="logs">📋 <span>Detailed Logs</span></div>
+                    <div class="nav-item" data-tab="search">🔍 <span>Search Feedback</span></div>
+                    <div class="nav-item" data-tab="notifications" id="navNotifications">🔔 <span>Alerts &amp;
+                            Notifications</span>
+                        <span class="notif-badge" id="notifBadge">0</span>
+                    </div>
+                    <div class="nav-item" data-tab="settings">🎨 <span>Theme Settings</span></div>
+                    <div class="nav-item" data-tab="management">⚙️ <span>Manage Institution</span></div>
+
+                    <button id="logoutBtn" class="nav-item logout-sidebar"
+                        style="width: 100%; border: none; font-size: inherit; margin-top: 20px; margin-bottom: 20px;">Sign
+                        Out</button>
+                </div> <!-- /sidebar -->
+
+                <!-- Main Workspace -->
+                <div class="main-content" style="padding-top: 20px;">
+                    <header class="header-flex"
+                        style="margin-bottom: 20px; padding-left: 55px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
+                        <div>
+                            <h1 id="pageTitle" style="text-align: left; margin: 0; font-size: 1.5rem;">Overview</h1>
+                            <div id="instIdContainer"
+                                style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                                Institution ID: <span id="displayInstId"
+                                    style="font-family: monospace; background: rgba(99, 102, 241, 0.1); padding: 2px 6px; border-radius: 4px; color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.1);">Loading...</span>
+                                <button onclick="copyInstId()"
+                                    style="background:none; border:none; color:var(--primary); cursor:pointer; font-size: 0.7rem; padding:0; min-height:unset; box-shadow:none;">Copy</button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- Section 1: Overview -->
+                    <div id="overview" class="tab-content active">
+
+                        <!-- 6 Stat Cards -->
+                        <div class="stats-grid-6">
+                            <div class="stat-card-v2">
+                                <div class="icon-box" style="background:rgba(99, 102, 241, 0.15);">📝</div>
+                                <div class="meta">
+                                    <small>Total Feedbacks</small>
+                                    <div class="big" id="totalFeedback" style="color:#6366f1;">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card-v2">
+                                <div class="icon-box" style="background:rgba(16, 185, 129, 0.15);">⭐</div>
+                                <div class="meta">
+                                    <small>Average Rating</small>
+                                    <div class="big" id="avgRating" style="color:#10b981;">0.0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card-v2">
+                                <div class="icon-box" style="background:rgba(239, 68, 68, 0.15);">🚨</div>
+                                <div class="meta">
+                                    <small>Low-Rating Alerts</small>
+                                    <div class="big" id="ovAlerts" style="color:#ef4444;">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card-v2">
+                                <div class="icon-box" style="background:rgba(245, 158, 11, 0.15);">🏆</div>
+                                <div class="meta">
+                                    <small>Top Faculty</small>
+                                    <div class="big" id="ovTopFaculty" style="color:#f59e0b;font-size:1.1rem;">—</div>
+                                </div>
+                            </div>
+                            <div class="stat-card-v2">
+                                <div class="icon-box" style="background:rgba(34, 197, 94, 0.15);">📚</div>
+                                <div class="meta">
+                                    <small>Most Reviewed Subject</small>
+                                    <div class="big" id="ovTopSubject" style="color:#22c55e;font-size:1.1rem;">—</div>
+                                </div>
+                            </div>
+                            <div class="stat-card-v2">
+                                <div class="icon-box" style="background:rgba(168, 85, 247, 0.15);">😊</div>
+                                <div class="meta">
+                                    <small>Satisfaction Rate</small>
+                                    <div class="big" id="ovSatisfaction" style="color:#a855f7;">0%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Leaderboard + Recent Activity -->
+                        <div class="overview-grid2">
+                            <!-- Faculty Leaderboard -->
+                            <div class="notif-panel">
+                                <h4 style="margin:0 0 16px 0;font-size:1rem;">🏅 Faculty Leaderboard</h4>
+                                <table class="mini-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Faculty Name</th>
+                                            <th>Avg Rating</th>
+                                            <th>Reviews</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaderboardBody">
+                                        <tr>
+                                            <td colspan="4"
+                                                style="text-align:center;color:var(--text-muted);padding:20px;">
+                                                Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Recent Activity -->
+                            <div class="notif-panel">
+                                <h4 style="margin:0 0 16px 0;font-size:1rem;">⏱️ Recent Activity</h4>
+                                <div id="recentActivity">
+                                    <div class="empty-state">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Analytics -->
+                    <div id="analytics" class="tab-content">
+                        <div class="main-grid">
+                            <div class="chart-card">
+                                <h3>Performance by Rating</h3>
+                                <div class="chart-wrapper"><canvas id="ratingChart"></canvas></div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Subject Distribution</h3>
+                                <div class="chart-wrapper" style="display: flex; justify-content: center;"><canvas
+                                        id="subjectChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Detailed Logs -->
+                    <div id="logs" class="tab-content">
+                        <div class="table-section">
+                            <h3 style="margin-bottom: 20px;">Faculty Feedback Log</h3>
+                            <div style="overflow-x: auto;">
+                                <table id="feedbackTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Student Name</th>
+                                            <th>Subject</th>
+                                            <th>Faculty</th>
+                                            <th>Rating</th>
+                                            <th>Comments</th>
+                                            <th>Admin Response</th>
+                                            <th>Timestamp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="feedbackBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Search Feedback -->
+                    <div id="search" class="tab-content">
+                        <div class="table-section">
+                            <h3 style="margin-bottom: 20px;">Search Feedback</h3>
+                            <div
+                                style="display: flex; gap: 12px; margin-bottom: 25px; align-items: end; max-width: 420px;">
+                                <div style="flex:1;">
+                                    <label
+                                        style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text-muted);">Student
+                                        ID (Roll No)</label>
+                                    <input type="text" id="searchId" placeholder="e.g. 12345"
+                                        style="padding: 10px; border: 1px solid var(--border); border-radius: 8px; width: 100%; font-size: 0.9rem; background: var(--bg-card); color: var(--text-main);"
+                                        onkeydown="if(event.key==='Enter') runSearch()">
+                                </div>
+                                <button onclick="runSearch()"
+                                    style="padding: 10px 22px; width: auto; height: 42px;">Search</button>
+                            </div>
+
+                            <div id="searchResults">
+                                <p style="text-align: center; color: var(--text-muted); padding: 40px 0;">Enter a
+                                    Student ID
+                                    and
+                                    click Search.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Theme Settings -->
+                    <div id="settings" class="tab-content">
+                        <div class="theme-switch-wrapper" style="width: auto; max-width: 400px; padding: 30px;">
+                            <div>
+                                <h3 style="margin: 0; margin-bottom: 8px;">Switch Appearance</h3>
+                                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Choose
+                                    between
+                                    a
+                                    light or dark theme for the dashboard.</p>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <span style="font-size: 1rem; font-weight: 600;">Dark Mode</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="themeToggle">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Alerts & Notifications -->
+                    <div id="notifications" class="tab-content">
+                        <!-- Alerts Panel -->
+                        <div class="notif-panel">
+                            <h4>🚨 Alerts <span
+                                    style="font-size:0.75rem;font-weight:500;color:#ef4444;background:#fef2f2;padding:3px 10px;border-radius:8px;">Rating
+                                    &lt; 2</span></h4>
+                            <div id="alertsList">
+                                <div class="empty-state">Loading...</div>
+                            </div>
+                        </div>
+                        <!-- Notifications Panel -->
+                        <div class="notif-panel">
+                            <h4>🔔 Recent Feedback Notifications</h4>
+                            <div id="notifList">
+                                <div class="empty-state">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 7: Management -->
+                    <div id="management" class="tab-content">
+                        <div class="main-grid">
+                            <!-- Faculty Management Card -->
+                            <div class="table-section">
+                                <h3 style="margin-bottom: 20px;">👨‍🏫 Faculty Management</h3>
+                                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                    <input type="text" id="newFacultyName" placeholder="New Faculty Name"
+                                        style="padding: 10px; border: 1px solid var(--border); border-radius: 8px; flex: 1; font-size: 0.9rem; background: var(--bg-main); color: var(--text-main);">
+                                    <button onclick="handleAddFaculty()"
+                                        style="padding: 10px 20px; width: auto; font-weight: 600;">Add</button>
+                                </div>
+                                <div
+                                    style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr
+                                                style="background: var(--bg-card); border-bottom: 2px solid var(--border);">
+                                                <th
+                                                    style="text-align: left; padding: 12px 15px; font-size: 0.85rem; color: var(--text-muted);">
+                                                    FACULTY NAME</th>
+                                                <th
+                                                    style="text-align: right; padding: 12px 15px; font-size: 0.85rem; color: var(--text-muted);">
+                                                    ACTION</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="managementFacultyBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Subject Management Card -->
+                            <div class="table-section">
+                                <h3 style="margin-bottom: 20px;">📚 Subject Management</h3>
+                                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                    <input type="text" id="newSubjectName" placeholder="New Subject Name"
+                                        style="padding: 10px; border: 1px solid var(--border); border-radius: 8px; flex: 1; font-size: 0.9rem; background: var(--bg-main); color: var(--text-main);">
+                                    <button onclick="handleAddSubject()"
+                                        style="padding: 10px 20px; width: auto; font-weight: 600;">Add</button>
+                                </div>
+                                <div
+                                    style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr
+                                                style="background: var(--bg-card); border-bottom: 2px solid var(--border);">
+                                                <th
+                                                    style="text-align: left; padding: 12px 15px; font-size: 0.85rem; color: var(--text-muted);">
+                                                    SUBJECT NAME</th>
+                                                <th
+                                                    style="text-align: right; padding: 12px 15px; font-size: 0.85rem; color: var(--text-muted);">
+                                                    ACTION</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="managementSubjectBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- /main-content -->
+            </div> <!-- /dashboard-container -->
+
+            <script src="js/theme.js"></script>
+            <script src="js/api.js"></script>
+            <script src="js/ui.js"></script>
+            <script>
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                        navigator.serviceWorker.register('sw.js')
+                            .then(reg => console.log('Service Worker registered'))
+                            .catch(err => console.log('Service Worker registration failed', err));
+                    });
+                }
+
+                // Auth check
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user || user.role !== 'admin') {
+                    window.location.href = 'index.html';
+                }
+
+                // Ensure institution_id is in localStorage
+                if (user && user.institution_id && !localStorage.getItem('institution_id')) {
+                    localStorage.setItem('institution_id', user.institution_id);
+                }
+
+                // Tab Switching Logic
+                document.addEventListener('DOMContentLoaded', () => {
+                    const navItems = document.querySelectorAll('.nav-item[data-tab], .bottom-nav-item[data-tab]');
+                    const tabContents = document.querySelectorAll('.tab-content');
+                    const pageTitle = document.getElementById('pageTitle');
+
+                    function switchTab(target) {
+                        // Remove active classes
+                        document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(i => i.classList.remove('active'));
+                        tabContents.forEach(c => c.classList.remove('active'));
+
+                        // Add active class
+                        const activeElements = document.querySelectorAll(`[data-tab="${target}"]`);
+                        activeElements.forEach(el => el.classList.add('active'));
+                        const targetTab = document.getElementById(target);
+                        if (targetTab) targetTab.classList.add('active');
+
+                        // Update header title
+                        const btn = document.querySelector(`.nav-item[data-tab="${target}"]`);
+                        if (btn) pageTitle.innerText = btn.innerText.replace(/[^a-zA-Z\s]/g, '').trim();
+
+                        // Load data if management tab is selected
+                        if (target === 'management') loadManagementData();
+                    }
+                    window.switchTab = switchTab;
+
+                    navItems.forEach(item => {
+                        item.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const target = item.getAttribute('data-tab');
+                            switchTab(target);
+                        });
+                    });
+
+                    // Mobile Menu Toggle
+                    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                    const sidebar = document.querySelector('.sidebar');
+                    const overlay = document.getElementById('sidebarOverlay');
+
+                    function toggleMobileMenu() {
+                        sidebar.classList.toggle('open');
+                        overlay.classList.toggle('active');
+                    }
+
+                    mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+                    overlay.addEventListener('click', toggleMobileMenu);
+
+                    // Close sidebar when clicking a nav item
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            sidebar.classList.remove('open');
+                            overlay.classList.remove('active');
+                        });
+                    });
+
+                    let allFeedbackCache = [];
+
+                    function runSearch() {
+                        const id = document.getElementById('searchId').value.trim();
+
+                        if (!id) {
+                            document.getElementById('searchResults').innerHTML =
+                                '<p style="text-align:center;color:var(--text-muted);padding:40px 0;">Please enter a Student ID to search.</p>';
+                            return;
+                        }
+
+                        if (allFeedbackCache.length === 0) {
+                            document.getElementById('searchResults').innerHTML =
+                                '<p style="text-align:center;color:var(--text-muted);padding:40px 0;">Data is still loading. Please wait a moment and try again.</p>';
+                            return;
+                        }
+
+                        const results = allFeedbackCache.filter(f =>
+                            f.roll_no && String(f.roll_no).includes(id)
+                        );
+
+                        const container = document.getElementById('searchResults');
+                        if (results.length === 0) {
+                            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px 0;">No feedback found for that Student ID.</p>';
+                            return;
+                        }
+
+                        container.innerHTML = `
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--border);">
+                            <th style="text-align:left;padding:10px 8px;font-size:0.85rem;">Student Name</th>
+                            <th style="text-align:left;padding:10px 8px;font-size:0.85rem;">Roll No</th>
+                            <th style="text-align:left;padding:10px 8px;font-size:0.85rem;">Subject</th>
+                            <th style="text-align:left;padding:10px 8px;font-size:0.85rem;">Faculty</th>
+                            <th style="text-align:left;padding:10px 8px;font-size:0.85rem;">Rating</th>
+                            <th style="text-align:left;padding:10px 8px;font-size:0.85rem;">Comments</th>
+                            <th style="text-align:left;padding:10px 8px;font-size:0.85rem;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${results.map(f => `
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <td style="padding:12px 8px;font-weight:600;">${f.student_name}</td>
+                                <td style="padding:12px 8px;color:#64748b;font-weight:700;">${f.roll_no || '—'}</td>
+                                <td style="padding:12px 8px;">
+                                    <span style="background:var(--primary);color:white;padding:3px 10px;border-radius:12px;font-size:0.8rem;opacity:0.9;">${f.subject}</span>
+                                </td>
+                                <td style="padding:12px 8px;">${f.teacher}</td>
+                                <td style="padding:12px 8px;color:${f.rating >= 4 ? '#10b981' : (f.rating <= 2 ? '#ef4444' : '#f59e0b')};font-weight:700;">${f.rating} ★</td>
+                                <td style="padding:12px 8px;color:#64748b;font-size:0.85rem;">${f.comments || '—'}</td>
+                                <td style="padding:12px 8px;color:#94a3b8;font-size:0.8rem;">${new Date(f.created_at).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;">${results.length} result(s) found.</p>
+            `;
+                    }
+
+                    // --- Management Logic ---
+                    async function loadManagementData() {
+                        const facultiesResult = await API.getFaculties();
+                        const subjectsResult = await API.getSubjects();
+
+                        if (facultiesResult.status === 'success') {
+                            const container = document.getElementById('managementFacultyBody');
+                            container.innerHTML = facultiesResult.data.map(f => `
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 12px 15px; font-weight: 500; color: var(--text-main);">${f.name}</td>
+                            <td style="padding: 12px 15px; text-align: right;">
+                                <button onclick="handleEditFaculty(${f.id}, '${f.name.replace(/'/g, "\\'")}')" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.2); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; margin-right: 5px; font-weight: 600;">Rename</button>
+                                <button onclick="handleDeleteFaculty(${f.id})" style="background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600;">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                        }
+
+                        if (subjectsResult.status === 'success') {
+                            const container = document.getElementById('managementSubjectBody');
+                            container.innerHTML = subjectsResult.data.map(s => `
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 12px 15px; font-weight: 500; color: var(--text-main);">${s.name}</td>
+                            <td style="padding: 12px 15px; text-align: right;">
+                                <button onclick="handleEditSubject(${s.id}, '${s.name.replace(/'/g, "\\'")}')" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.2); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; margin-right: 5px; font-weight: 600;">Rename</button>
+                                <button onclick="handleDeleteSubject(${s.id})" style="background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600;">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                        }
+                    }
+
+                    async function handleAddFaculty() {
+                        const input = document.getElementById('newFacultyName');
+                        const name = input.value.trim();
+                        if (!name) return;
+
+                        const result = await API.addFaculty(name);
+                        if (result.status === 'success') {
+                            input.value = '';
+                            loadManagementData();
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    }
+
+                    async function handleAddSubject() {
+                        const input = document.getElementById('newSubjectName');
+                        const name = input.value.trim();
+                        if (!name) return;
+
+                        const result = await API.addSubject(name);
+                        if (result.status === 'success') {
+                            input.value = '';
+                            loadManagementData();
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    }
+
+                    async function handleDeleteFaculty(id) {
+                        if (!confirm('Are you sure you want to delete this faculty?')) return;
+                        const result = await API.deleteFaculty(id);
+                        if (result.status === 'success') {
+                            loadManagementData();
+                        }
+                    }
+
+                    async function handleDeleteSubject(id) {
+                        if (!confirm('Are you sure you want to delete this subject?')) return;
+                        const result = await API.deleteSubject(id);
+                        if (result.status === 'success') {
+                            loadManagementData();
+                        }
+                    }
+
+                    async function handleEditFaculty(id, currentName) {
+                        const newName = prompt('Enter new faculty name:', currentName);
+                        if (!newName || newName === currentName) return;
+
+                        const result = await API.updateFaculty(id, newName);
+                        if (result.status === 'success') {
+                            loadManagementData();
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    }
+
+                    async function handleEditSubject(id, currentName) {
+                        const newName = prompt('Enter new subject name:', currentName);
+                        if (!newName || newName === currentName) return;
+
+                        const result = await API.updateSubject(id, newName);
+                        if (result.status === 'success') {
+                            loadManagementData();
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    }
+
+                    function updateOverview() {
+                        const feed = allFeedbackCache;
+                        if (!feed || feed.length === 0) return;
+
+                        // — Alerts count (rating < 2) —
+                        document.getElementById('ovAlerts').innerText = feed.filter(f => f.rating < 2).length;
+
+                        // — Satisfaction rate (rating >= 4) —
+                        const satisfied = feed.filter(f => f.rating >= 4).length;
+                        document.getElementById('ovSatisfaction').innerText =
+                            Math.round((satisfied / feed.length) * 100) + '%';
+
+                        // — Top faculty by avg rating —
+                        const facultyMap = {};
+                        feed.forEach(f => {
+                            if (!facultyMap[f.teacher]) facultyMap[f.teacher] = { total: 0, count: 0 };
+                            facultyMap[f.teacher].total += f.rating;
+                            facultyMap[f.teacher].count++;
+                        });
+                        const sorted = Object.entries(facultyMap)
+                            .map(([name, d]) => ({ name, avg: d.total / d.count, count: d.count }))
+                            .sort((a, b) => b.avg - a.avg);
+                        document.getElementById('ovTopFaculty').innerText = sorted[0]?.name || '—';
+
+                        // — Most reviewed subject —
+                        const subjectMap = {};
+                        feed.forEach(f => { subjectMap[f.subject] = (subjectMap[f.subject] || 0) + 1; });
+                        const topSubject = Object.entries(subjectMap).sort((a, b) => b[1] - a[1])[0];
+                        document.getElementById('ovTopSubject').innerText = topSubject?.[0] || '—';
+
+                        // — Faculty Leaderboard (top 5) —
+                        const medals = ['🥇', '🥈', '🥉', '4', '5'];
+                        document.getElementById('leaderboardBody').innerHTML = sorted.slice(0, 5).map((f, i) => `
+                        <tr>
+                            <td style="font-size:1.1rem; padding: 12px 0;">${medals[i]}</td>
+                            <td style="font-weight:600; color: var(--text-main);">${f.name}</td>
+                            <td style="color:${f.avg >= 4 ? '#10b981' : f.avg <= 2 ? '#ef4444' : '#f59e0b'};font-weight:700;">${f.avg.toFixed(1)} ★</td>
+                            <td style="color:var(--text-muted); opacity: 0.8;">${f.count} review${f.count > 1 ? 's' : ''}</td>
+                        </tr>
+                    `).join('');
+
+                        // — Recent Activity (last 6) —
+                        const recent = [...feed].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
+                        document.getElementById('recentActivity').innerHTML = recent.map(f => `
+                        <div class="activity-item" style="border-bottom: 1px solid var(--border); padding: 12px 0;">
+                            <div class="activity-dot" style="background:${f.rating >= 4 ? '#10b981' : f.rating <= 2 ? '#ef4444' : '#f59e0b'};"></div>
+                            <div style="flex:1;">
+                                <div style="font-size:0.88rem;font-weight:600; color: var(--text-main);">${f.student_name} &rarr; ${f.teacher}</div>
+                                <div style="font-size:0.78rem;color:var(--text-muted); opacity: 0.8;">${f.subject} &middot; ${f.rating} ★ &middot; ${timeAgo(f.created_at)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    }
+
+                    let ratingChartInstance = null;
+                    let subjectChartInstance = null;
+
+                    async function loadDashboard() {
+                        try {
+                            const result = await API.getStats();
+                            if (result.status === 'success') {
+                                const data = result.data;
+                                allFeedbackCache = data.feedback; // Cache for Search
+                                document.getElementById('totalFeedback').innerText = data.total_feedback;
+                                document.getElementById('avgRating').innerText = data.average_rating.toFixed(1);
+
+                                const tbody = document.getElementById('feedbackBody');
+                                if (data.feedback && data.feedback.length > 0) {
+                                    tbody.innerHTML = data.feedback.map(f => `
+                                        <tr id="row-${f.id}">
+                                            <td style="font-weight: 600; color: var(--text-main);">${f.student_name}</td>
+                                            <td><span style="background:var(--primary); color:white; padding:4px 10px; border-radius:12px; font-size:0.85rem; opacity:0.9;">${f.subject}</span></td>
+                                            <td style="font-weight: 500; color: var(--text-main);">${f.teacher}</td>
+                                            <td style="color: ${f.rating >= 4 ? '#10b981' : (f.rating <= 2 ? '#ef4444' : '#f59e0b')}; font-weight:700;">
+                                                ${f.rating} ★
+                                            </td>
+                                            <td style="color: var(--text-muted); font-size:0.9rem;">${f.comments || 'No comment'}</td>
+                                            <td>
+                                                <div style="display: flex; gap: 8px; flex-direction: column;">
+                                                    ${f.admin_response ?
+                                            `<div style="background: var(--bg-main); color: var(--text-main); padding: 8px; border-radius: 8px; font-size: 0.85rem; font-style: italic; border-left: 3px solid var(--primary);">
+                                                            ${f.admin_response}
+                                                         </div>` :
+                                            `<textarea id="res-${f.id}" placeholder="Type response..." style="padding: 6px; font-size: 0.8rem; background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border);"></textarea>
+                                                         <button onclick="submitResponse('${f.id}')" style="padding: 4px 8px; font-size: 0.75rem; width: auto; background: var(--primary); color: white;">Send</button>`
+                                        }
+                                                </div>
+                                            </td>
+                                            <td style="color: var(--text-muted); font-size:0.8rem; opacity: 0.7;">${new Date(f.created_at).toLocaleDateString()}</td>
+                                        </tr>
+                                    `).join('');
+                                } else {
+                                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted);">No feedback found for your institution.</td></tr>';
+                                }
+
+                                // Fetch current subjects to make the chart dynamic
+                                const subjectsResult = await API.getSubjects();
+                                const subjectsList = subjectsResult.status === 'success' ? subjectsResult.data.map(s => s.name) : [];
+
+                                initCharts(data.feedback, subjectsList);
+                                loadNotifications();
+                                updateOverview();
+                            } else {
+                                console.error("Dash error:", result.message);
+                                if (result.message && result.message.includes("institution_id")) {
+                                    alert("Please log in again to sync your institution details.");
+                                    window.location.href = 'index.html';
+                                }
+                            }
+                        } catch (err) {
+                            console.error("Dashboard failed to load:", err);
+                        }
+                    }
+
+                    async function submitResponse(id) {
+                        const textArea = document.getElementById(`res-${id}`);
+                        const responseText = textArea.value;
+                        if (!responseText) return alert("Please type a response");
+
+                        const btn = event.target;
+                        btn.innerText = "Sending...";
+                        btn.disabled = true;
+
+                        const res = await API.respondToFeedback(id, responseText);
+                        if (res.status === 'success') {
+                            loadDashboard(); // Refresh
+                        } else {
+                            alert("Error: " + res.message);
+                            btn.innerText = "Send";
+                            btn.disabled = false;
+                        }
+                    }
+
+                    function initCharts(feedback, subjectsList) {
+                        // Destroy existing charts to prevent leaks/overlap
+                        if (ratingChartInstance) ratingChartInstance.destroy();
+                        if (subjectChartInstance) subjectChartInstance.destroy();
+
+                        // Rating Data
+                        const ratings = [0, 0, 0, 0, 0];
+                        feedback.forEach(f => {
+                            if (f.rating >= 1 && f.rating <= 5) ratings[f.rating - 1]++;
+                        });
+
+                        ratingChartInstance = new Chart(document.getElementById('ratingChart'), {
+                            type: 'bar',
+                            data: {
+                                labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+                                datasets: [{
+                                    label: 'Feedback Count',
+                                    data: ratings,
+                                    backgroundColor: ['#fca5a5', '#fecaca', '#fde68a', '#a7f3d0', '#6366f1'],
+                                    borderRadius: 8
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: { y: { beginAtZero: true, grid: { display: false } } }
+                            }
+                        });
+
+                        // Subject Data - Dynamic based on subjectsList
+                        const subjectCounts = {};
+
+                        // If we have a subjectsList, initialize them all to zero
+                        if (subjectsList && subjectsList.length > 0) {
+                            subjectsList.forEach(s => subjectCounts[s] = 0);
+                        }
+
+                        feedback.forEach(f => {
+                            // Only count if it's in our known subjects list (or if list is empty, count everything)
+                            if (!subjectsList || subjectsList.length === 0 || subjectsList.includes(f.subject)) {
+                                subjectCounts[f.subject] = (subjectCounts[f.subject] || 0) + 1;
+                            }
+                        });
+
+                        // Generate expanded color palette for dynamic subjects
+                        const colors = [
+                            '#6366f1', '#10b981', '#f59e0b', '#ef4444',
+                            '#8b5cf6', '#ec4899', '#06b6d4', '#f97316',
+                            '#14b8a6', '#f43f5e', '#a855f7', '#3b82f6',
+                            '#eab308', '#22c55e', '#84cc16', '#06b6d4'
+                        ];
+
+                        subjectChartInstance = new Chart(document.getElementById('subjectChart'), {
+                            type: 'doughnut',
+                            data: {
+                                labels: Object.keys(subjectCounts),
+                                datasets: [{
+                                    data: Object.values(subjectCounts),
+                                    backgroundColor: colors.slice(0, Object.keys(subjectCounts).length),
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { position: 'right', labels: { usePointStyle: true, padding: 20 } }
+                                },
+                                cutout: '70%'
+                            }
+                        });
+                    }
+
+                    document.getElementById('logoutBtn').addEventListener('click', () => {
+                        localStorage.removeItem('user');
+                        window.location.href = 'index.html';
+                    });
+
+                    function timeAgo(dateStr) {
+                        const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+                        if (diff < 60) return `${diff}s ago`;
+                        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+                        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+                        return new Date(dateStr).toLocaleDateString();
+                    }
+
+                    function loadNotifications() {
+                        const feed = [...allFeedbackCache].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                        // — ALERTS: rating < 2 —
+                        const alerts = feed.filter(f => f.rating < 2);
+                        const alertsList = document.getElementById('alertsList');
+                        if (alerts.length === 0) {
+                            alertsList.innerHTML = '<div class="empty-state">✅ No low-rating alerts right now.</div>';
+                        } else {
+                            alertsList.innerHTML = alerts.map(f => `
+                            <div class="notif-item clickable" onclick="goToFeedback('${f.id}')" style="border-bottom: 1px solid var(--border); padding: 12px; transition: background 0.2s; background: var(--bg-card);">
+                                <div class="notif-icon red" style="background: rgba(239, 68, 68, 0.1); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">⚠️</div>
+                                <div class="notif-body" style="margin-left: 12px; flex: 1;">
+                                    <strong style="display: block; color: var(--text-main); font-size: 0.9rem;">${f.student_name} rated ${f.teacher} — ${f.rating} ★</strong>
+                                    <span style="display: block; color: var(--text-muted); font-size: 0.8rem;">Subject: ${f.subject} · "${f.comments || 'No comment'}"</span>
+                                </div>
+                                <div class="notif-time" style="font-size: 0.75rem; color: var(--text-muted); opacity: 0.7;">${timeAgo(f.created_at)} &nbsp;→</div>
+                            </div>
+                        `).join('');
+                        }
+
+                        // — NOTIFICATIONS: latest 10 feedbacks —
+                        const notifList = document.getElementById('notifList');
+                        if (feed.length === 0) {
+                            notifList.innerHTML = '<div class="empty-state">No feedback submitted yet.</div>';
+                        } else {
+                            notifList.innerHTML = feed.slice(0, 10).map(f => `
+                            <div class="notif-item clickable" onclick="goToFeedback('${f.id}')" style="border-bottom: 1px solid var(--border); padding: 12px; transition: background 0.2s; background: var(--bg-card);">
+                                <div class="notif-icon ${f.rating >= 4 ? 'green' : f.rating <= 2 ? 'red' : 'orange'}" style="background: rgba(99, 102, 241, 0.1); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">📝</div>
+                                <div class="notif-body" style="margin-left: 12px; flex: 1;">
+                                    <strong style="display: block; color: var(--text-main); font-size: 0.9rem;">New feedback from ${f.student_name}</strong>
+                                    <span style="display: block; color: var(--text-muted); font-size: 0.8rem;">${f.subject} · ${f.teacher} · ${f.rating} ★ rating</span>
+                                </div>
+                                <div class="notif-time" style="font-size: 0.75rem; color: var(--text-muted); opacity: 0.7;">${timeAgo(f.created_at)} &nbsp;→</div>
+                            </div>
+                        `).join('');
+                        }
+
+                        // — BADGE: total alerts count —
+                        const badge = document.getElementById('notifBadge');
+                        const totalAlerts = alerts.length + feed.slice(0, 10).length;
+                        if (totalAlerts > 0) {
+                            badge.innerText = totalAlerts;
+                            badge.style.display = 'inline-block';
+                        }
+                    }
+
+                    function goToFeedback(id) {
+                        // 1. Switch to Detailed Logs tab
+                        navItems.forEach(i => i.classList.remove('active'));
+                        tabContents.forEach(c => c.classList.remove('active'));
+                        const logsNav = document.querySelector('.nav-item[data-tab="logs"]');
+                        if (logsNav) logsNav.classList.add('active');
+                        const logsTab = document.getElementById('logs');
+                        if (logsTab) logsTab.classList.add('active');
+                        pageTitle.innerText = '📋 Detailed Logs';
+
+                        // 2. Find the target row and highlight it
+                        setTimeout(() => {
+                            const row = document.getElementById('row-' + id);
+                            if (row) {
+                                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                row.classList.add('row-highlight');
+                                setTimeout(() => row.classList.remove('row-highlight'), 2200);
+                            }
+                        }, 150);
+                    }
+
+                    // Display Institution ID
+                    const displayInstId = document.getElementById('displayInstId');
+                    if (displayInstId && user && user.institution_id) {
+                        displayInstId.innerText = user.institution_id;
+                    }
+
+                    function copyInstId() {
+                        const id = document.getElementById('displayInstId').innerText;
+                        navigator.clipboard.writeText(id).then(() => {
+                            alert('Institution ID copied to clipboard!');
+                        });
+                    }
+
+                    window.handleAddFaculty = handleAddFaculty;
+                    window.handleAddSubject = handleAddSubject;
+                    window.handleDeleteFaculty = handleDeleteFaculty;
+                    window.handleDeleteSubject = handleDeleteSubject;
+                    window.handleEditFaculty = handleEditFaculty;
+                    window.handleEditSubject = handleEditSubject;
+                    window.runSearch = runSearch;
+                    window.copyInstId = copyInstId;
+                    window.goToFeedback = goToFeedback;
+                    window.submitResponse = submitResponse;
+                    window.loadManagementData = loadManagementData;
+
+                    loadDashboard();
+                });
+            </script>
+            <nav class="bottom-nav">
+                <a href="#" class="bottom-nav-item active" data-tab="overview">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <a href="#" class="bottom-nav-item" data-tab="analytics">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 20V10M12 20V4M6 20v-6"></path>
+                    </svg>
+                    <span>Stats</span>
+                </a>
+                <a href="#" class="bottom-nav-item" data-tab="notifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span>Alerts</span>
+                </a>
+                <a href="#" class="bottom-nav-item" data-tab="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                    <span>Theme</span>
+                </a>
+                <a href="#" class="bottom-nav-item" data-tab="management">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17">
+                        </path>
+                    </svg>
+                    <span>Manage</span>
+                </a>
+            </nav>
+        </div><!-- /phone-screen -->
+    </div><!-- /phone-shell -->
+</body>
+
+</html>

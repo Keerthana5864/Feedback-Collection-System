@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6366f1">
+    <title>Reset Password - Feedback System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <script src="js/theme.js"></script>
+    <style>
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .otp-display {
+            text-align: center;
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: 14px;
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 22px;
+            margin: 16px 0;
+        }
+
+        .info-box {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: background 0.3s;
+        }
+
+        .dot.active {
+            background: #6366f1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone-shell">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+            <div class="status-bar">
+                <span class="status-time">9:41</span>
+                <div class="status-icons">
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
+                        <rect x="0" y="3" width="3" height="9" rx="1" />
+                        <rect x="4.5" y="1.5" width="3" height="10.5" rx="1" />
+                        <rect x="9" y="0" width="3" height="12" rx="1" />
+                    </svg>
+                    <svg width="16" height="12" viewBox="0 0 24 12" fill="currentColor">
+                        <rect x="0" y="1" width="20" height="10" rx="2" stroke="currentColor" stroke-width="1.5"
+                            fill="none" />
+                        <rect x="1.5" y="2.5" width="14" height="7" rx="1" />
+                        <rect x="21" y="4" width="2" height="4" rx="1" />
+                    </svg>
+                </div>
+            </div>
+            <div class="app-scroll">
+                <div class="app-inner">
+                    <div class="container">
+                        <h1 style="font-size: 1.75rem;">Reset Password</h1>
+                        <p class="subtitle">Verify via email & phone</p>
+
+                        <div class="progress-dots">
+                            <div class="dot active" id="dot1"></div>
+                            <div class="dot" id="dot2"></div>
+                            <div class="dot" id="dot3"></div>
+                        </div>
+
+                        <!-- Step 1: Email + Phone -->
+                        <div class="step active" id="step1">
+                            <p class="info-box">Enter your account email and the phone number you used in feedback.</p>
+                            <form id="phoneForm">
+                                <div class="form-group">
+                                    <label for="emailInput">Email Address</label>
+                                    <input type="email" id="emailInput" required placeholder="name@example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type="tel" id="phone" required placeholder="e.g. 7349092783">
+                                </div>
+                                <button type="submit" id="sendOtpBtn">Get OTP →</button>
+                            </form>
+                        </div>
+
+                        <!-- Step 2: OTP Verification -->
+                        <div class="step" id="step2">
+                            <p class="info-box">Your one-time code is shown below. In a live system this would arrive
+                                via SMS.</p>
+                            <div class="otp-display" id="otpDisplay">——</div>
+                            <form id="otpForm">
+                                <div class="form-group">
+                                    <label for="otpInput">Enter the 6-digit OTP above</label>
+                                    <input type="number" id="otpInput" required placeholder="e.g. 483920"
+                                        oninput="if(this.value.length > 6) this.value = this.value.slice(0,6);">
+                                </div>
+                                <button type="submit" id="verifyOtpBtn">Verify OTP →</button>
+                            </form>
+                        </div>
+
+                        <!-- Step 3: New Password -->
+                        <div class="step" id="step3">
+                            <p class="info-box">✅ OTP verified! Set your new password below.</p>
+                            <form id="resetForm">
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" required placeholder="Min. 6 characters">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirm Password</label>
+                                    <input type="password" id="confirmPassword" required
+                                        placeholder="Re-enter password">
+                                </div>
+                                <button type="submit" id="resetBtn">Reset Password</button>
+                            </form>
+                        </div>
+
+                        <div class="auth-links" style="margin-top: 1.5rem;">
+                            <a href="index.html">← Back to Login</a>
+                        </div>
+
+                        <div id="msg" class="hidden"
+                            style="margin-top: 1rem; text-align: center; padding: 0.75rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 500;">
+                        </div>
+                    </div>
+
+                    <script>
+                        const API_URL = 'http://localhost:5000/api';
+                        let generatedOtp = null;
+                        let verifiedEmail = null;
+
+                        function showMsg(text, isError = false) {
+                            const msg = document.getElementById('msg');
+                            msg.innerText = text;
+                            msg.style.color = isError ? '#ef4444' : '#f59e0b';
+                            msg.style.background = isError ? '#fef2f2' : '#fffbeb';
+                            msg.classList.remove('hidden');
+                        }
+
+                        function setStep(n) {
+                            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+                            document.getElementById('step' + n).classList.add('active');
+                            document.querySelectorAll('.dot').forEach((d, i) => {
+                                d.classList.toggle('active', i < n);
+                            });
+                            document.getElementById('msg').classList.add('hidden');
+                        }
+
+                        // Step 1: Verify email + phone, generate OTP
+                        document.getElementById('phoneForm').addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const email = document.getElementById('emailInput').value.trim();
+                            const phone = document.getElementById('phone').value.trim();
+                            const btn = document.getElementById('sendOtpBtn');
+                            btn.disabled = true;
+                            btn.innerText = 'Verifying...';
+
+                            try {
+                                const res = await fetch(`${API_URL}/forgot-password-phone`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email, phone })
+                                });
+                                const result = await res.json();
+                                if (result.status === 'success') {
+                                    generatedOtp = result.otp;
+                                    verifiedEmail = email;
+                                    document.getElementById('otpDisplay').innerText = result.otp;
+                                    setStep(2);
+                                } else {
+                                    showMsg('❌ ' + result.message, true);
+                                }
+                            } catch (err) {
+                                // Demo fallback when backend offline
+                                const demoOtp = Math.floor(100000 + Math.random() * 900000);
+                                generatedOtp = demoOtp;
+                                verifiedEmail = email;
+                                document.getElementById('otpDisplay').innerText = demoOtp;
+                                setStep(2);
+                                showMsg('⚠️ Demo mode: backend offline. Use the code above.', false);
+                            }
+
+                            btn.disabled = false;
+                            btn.innerText = 'Get OTP →';
+                        });
+
+                        // Step 2: Verify the OTP
+                        document.getElementById('otpForm').addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            const entered = document.getElementById('otpInput').value.trim();
+                            if (entered === String(generatedOtp)) {
+                                setStep(3);
+                            } else {
+                                showMsg('❌ Incorrect OTP. Please try again.', true);
+                            }
+                        });
+
+                        // Step 3: Reset password — update by EMAIL directly
+                        document.getElementById('resetForm').addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const newPass = document.getElementById('newPassword').value;
+                            const confirmPass = document.getElementById('confirmPassword').value;
+
+                            if (newPass !== confirmPass) {
+                                showMsg('❌ Passwords do not match.', true);
+                                return;
+                            }
+                            if (newPass.length < 6) {
+                                showMsg('❌ Password must be at least 6 characters.', true);
+                                return;
+                            }
+
+                            const btn = document.getElementById('resetBtn');
+                            btn.disabled = true;
+                            btn.innerText = 'Saving...';
+
+                            try {
+                                const res = await fetch(`${API_URL}/reset-password-phone`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email: verifiedEmail, new_password: newPass })
+                                });
+                                const result = await res.json();
+                                if (result.status === 'success') {
+                                    document.getElementById('msg').innerText = '✅ Password changed! Redirecting to login...';
+                                    document.getElementById('msg').style.color = '#10b981';
+                                    document.getElementById('msg').style.background = '#ecfdf5';
+                                    document.getElementById('msg').classList.remove('hidden');
+                                    setTimeout(() => window.location.href = 'index.html', 2000);
+                                } else {
+                                    showMsg('❌ ' + result.message, true);
+                                    btn.disabled = false;
+                                    btn.innerText = 'Reset Password';
+                                }
+                            } catch {
+                                showMsg('❌ Cannot connect to server.', true);
+                                btn.disabled = false;
+                                btn.innerText = 'Reset Password';
+                            }
+                        });
+                    </script>
+                </div><!-- /app-inner -->
+            </div><!-- /app-scroll -->
+        </div><!-- /phone-screen -->
+    </div><!-- /phone-shell -->
+
+    <div class="phone-label">
+        <div class="phone-label-badge">📱 Mobile App</div>
+        <h2>Reset<br>Your<br>Password</h2>
+        <p>Verify via email and phone, then set a new password securely.</p>
+    </div>
+</body>
+
+</html>

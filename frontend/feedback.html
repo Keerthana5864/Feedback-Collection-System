@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6366f1">
+    <title>Submit Feedback - Feedback System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/theme.js"></script>
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <script src="js/theme.js"></script>
+    <style>
+        /* Feedback-specific page layout */
+        body {
+            min-height: 100vh;
+            background: var(--bg-body-gradient);
+        }
+
+        .feedback-page {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 16px;
+            padding-bottom: calc(80px + env(safe-area-inset-bottom));
+        }
+
+        /* Top bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .top-bar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .top-bar-logo .app-logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+        }
+
+        .top-bar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .top-bar-sub {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* Section card */
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Star rating */
+        .star-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .star-rating-row {
+            display: flex;
+            gap: 8px;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .star-rating-row input {
+            display: none;
+        }
+
+        .star-rating-row label {
+            font-size: 2.2rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: color 0.15s, transform 0.15s;
+            margin-bottom: 0;
+            min-height: unset;
+            line-height: 1;
+            padding: 4px;
+        }
+
+        .star-rating-row label:hover,
+        .star-rating-row label:hover~label,
+        .star-rating-row input:checked~label {
+            color: #f59e0b;
+        }
+
+        .star-rating-row label:active {
+            transform: scale(1.3);
+        }
+
+        .star-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            min-height: 20px;
+            transition: color 0.2s;
+        }
+
+        /* Response card */
+        .response-card {
+            background: var(--bg-main);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+
+        .response-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .response-subject-badge {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.85rem;
+        }
+
+        .response-date {
+            font-size: 0.72rem;
+            color: #94a3b8;
+        }
+
+        .response-comment {
+            font-size: 0.85rem;
+            color: #475569;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .admin-reply {
+            background: var(--card-bg);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            margin-top: 8px;
+        }
+
+        .admin-reply-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+        }
+
+        .admin-reply-text {
+            font-size: 0.82rem;
+            color: var(--text-main);
+        }
+
+        .awaiting-text {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        /* History toggle button */
+        #toggleResponses {
+            background: var(--border);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: none;
+        }
+
+        #toggleResponses:hover {
+            background: #dde3ec;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Logout button style */
+        .logout-link-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            box-shadow: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 0;
+        }
+
+        .logout-link-btn:hover {
+            background: #fef2f2;
+            color: #ef4444;
+            border-color: #fca5a5;
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone-shell">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+            <div class="status-bar">
+                <span class="status-time">9:41</span>
+                <div class="status-icons">
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
+                        <rect x="0" y="3" width="3" height="9" rx="1" />
+                        <rect x="4.5" y="1.5" width="3" height="10.5" rx="1" />
+                        <rect x="9" y="0" width="3" height="12" rx="1" />
+                    </svg>
+                    <svg width="16" height="12" viewBox="0 0 24 12" fill="currentColor">
+                        <rect x="0" y="1" width="20" height="10" rx="2" stroke="currentColor" stroke-width="1.5"
+                            fill="none" />
+                        <rect x="1.5" y="2.5" width="14" height="7" rx="1" />
+                        <rect x="21" y="4" width="2" height="4" rx="1" />
+                    </svg>
+                </div>
+            </div>
+            <div class="app-scroll">
+                <div class="feedback-page">
+
+                    <!-- Top Bar -->
+                    <div class="top-bar">
+                        <div class="top-bar-logo">
+                            <div class="app-logo-icon">
+                                <svg width="22" height="22" viewBox="0 0 44 44" fill="none">
+                                    <polygon points="22,10 36,17 22,24 8,17" fill="white" opacity="0.95" />
+                                    <path d="M12 18.5v6c0 2.5 4.5 5 10 5s10-2.5 10-5v-6" stroke="white" stroke-width="2"
+                                        fill="none" stroke-linecap="round" />
+                                    <circle cx="33" cy="33" r="7" fill="#fbbf24" />
+                                    <path d="M33 28.5l1.2 3.6h3.8l-3 2.2 1.1 3.4-3.1-2.2-3.1 2.2 1.1-3.4-3-2.2h3.8z"
+                                        fill="white" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="top-bar-title">Feedback Form</div>
+                                <div class="top-bar-sub">Faculty Feedback System</div>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('logoutBtn').click()" style="background:transparent;color:var(--text-muted);border:1px solid var(--border);
+                       width:auto;padding:6px 14px;font-size:0.8rem;min-height:unset;box-shadow:none;font-weight:600;">
+                            Sign Out
+                        </button>
+                    </div>
+
+                    <!-- Student Details Card -->
+                    <div class="section-card">
+                        <div class="section-label">👤 Student Details</div>
+                        <form id="feedbackForm">
+                            <div class="form-group">
+                                <label for="studentName">Full Name</label>
+                                <input type="text" id="studentName" required placeholder="John Doe" autocomplete="name">
+                            </div>
+                            <div class="feedback-grid-2">
+                                <div class="form-group">
+                                    <label for="rollNo">Student ID <span
+                                            style="font-size:0.72rem;color:var(--text-muted);">(max 5
+                                            digits)</span></label>
+                                    <input type="number" id="rollNo" required placeholder="e.g. 12345" min="1"
+                                        max="99999" oninput="if(this.value.length>5) this.value=this.value.slice(0,5);"
+                                        inputmode="numeric">
+                                </div>
+                                <div class="form-group">
+                                    <label for="phoneNumber">Phone Number</label>
+                                    <input type="tel" id="phoneNumber" required placeholder="+1 234 567 890"
+                                        autocomplete="tel">
+                                </div>
+                            </div>
+
+                            <!-- Course Details Card -->
+                            <div class="section-label" style="margin-top:1rem;">📚 Course Details</div>
+                            <div class="feedback-grid-2">
+                                <div class="form-group">
+                                    <label for="subject">Subject</label>
+                                    <select id="subject" required>
+                                        <option value="">Select Subject</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="teacher">Faculty</label>
+                                    <select id="teacher" required>
+                                        <option value="">Select Faculty</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Rating & Comment -->
+                            <div class="section-label" style="margin-top:1rem;">⭐ Rating & Comments</div>
+                            <div class="form-group star-group">
+                                <label>Rating (tap a star)</label>
+                                <div class="star-rating-row" id="starRow">
+                                    <input type="radio" name="rating" id="s5" value="5">
+                                    <label for="s5" title="5 - Excellent">★</label>
+                                    <input type="radio" name="rating" id="s4" value="4">
+                                    <label for="s4" title="4 - Very Good">★</label>
+                                    <input type="radio" name="rating" id="s3" value="3" checked>
+                                    <label for="s3" title="3 - Good">★</label>
+                                    <input type="radio" name="rating" id="s2" value="2">
+                                    <label for="s2" title="2 - Fair">★</label>
+                                    <input type="radio" name="rating" id="s1" value="1">
+                                    <label for="s1" title="1 - Poor">★</label>
+                                </div>
+                                <div class="star-hint" id="starHint">3 — Good</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comments">Comments</label>
+                                <textarea id="comments" rows="4"
+                                    placeholder="Share your thoughts about this faculty and subject..."></textarea>
+                            </div>
+
+                            <button type="submit" id="submitBtn">✓ Submit Feedback</button>
+                        </form>
+                    </div>
+
+                    <div id="statusMsg" class="hidden"
+                        style="margin-bottom: 16px; text-align: center; padding: 1rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 600;">
+                    </div>
+
+                    <!-- Previous Responses -->
+                    <div id="responsesContainer">
+                        <button id="toggleResponses">
+                            <span>📋 My Previous Feedback</span>
+                            <span id="toggleIcon">▼</span>
+                        </button>
+                        <div id="responsesSection" class="hidden" style="margin-top: 12px;">
+                            <div id="responseList" style="display: flex; flex-direction: column; gap: 10px;">
+                                <p
+                                    style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 20px 0;">
+                                    No
+                                    responses yet.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="logoutBtn" class="logout-link-btn" style="margin-top: 16px;">Logout</button>
+                </div>
+
+                <!-- Bottom Navigation -->
+                <nav class="bottom-nav">
+                    <a href="#" class="bottom-nav-item active" id="navFeedback">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        <span>Feedback</span>
+                    </a>
+                    <a href="#" class="bottom-nav-item" id="navHistory">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>History</span>
+                    </a>
+                    <a href="#" class="bottom-nav-item" id="navLogout">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path>
+                        </svg>
+                        <span>Exit</span>
+                    </a>
+                </nav>
+
+                <script src="js/theme.js"></script>
+                <script src="js/api.js"></script>
+                <script src="js/ui.js"></script>
+                <script>
+                    // Service Worker
+                    if ('serviceWorker' in navigator) {
+                        window.addEventListener('load', () => {
+                            navigator.serviceWorker.register('sw.js')
+                                .then(() => console.log('SW registered'))
+                                .catch(err => console.log('SW failed', err));
+                        });
+                    }
+
+                    // Auth check
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (!user || user.role !== 'student') window.location.href = 'index.html';
+
+                    // Pre-fill student info
+                    if (user) {
+                        if (user.full_name) document.getElementById('studentName').value = user.full_name;
+                        if (user.student_id) document.getElementById('rollNo').value = user.student_id;
+                        if (user.phone_number) document.getElementById('phoneNumber').value = user.phone_number;
+                    }
+
+                    // Load Faculties and Subjects
+                    async function loadOptions() {
+                        const facultiesResult = await API.getFaculties();
+                        const subjectsResult = await API.getSubjects();
+
+                        if (facultiesResult.status === 'success') {
+                            const select = document.getElementById('teacher');
+                            facultiesResult.data.forEach(f => {
+                                const opt = document.createElement('option');
+                                opt.value = f.name;
+                                opt.textContent = f.name;
+                                select.appendChild(opt);
+                            });
+                        }
+
+                        if (subjectsResult.status === 'success') {
+                            const select = document.getElementById('subject');
+                            subjectsResult.data.forEach(s => {
+                                const opt = document.createElement('option');
+                                opt.value = s.name;
+                                opt.textContent = s.name;
+                                select.appendChild(opt);
+                            });
+                        }
+                    }
+                    loadOptions();
+
+                    // Star rating hint
+                    const starLabels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+                    document.querySelectorAll('input[name="rating"]').forEach(input => {
+                        input.addEventListener('change', () => {
+                            const val = parseInt(input.value);
+                            const hint = document.getElementById('starHint');
+                            hint.textContent = `${val} — ${starLabels[val]}`;
+                            hint.style.color = val <= 2 ? '#ef4444' : val === 3 ? '#f59e0b' : '#10b981';
+                            // Haptic
+                            if (navigator.vibrate) navigator.vibrate(30);
+                        });
+                    });
+
+                    // Toggle history
+                    const toggleBtn = document.getElementById('toggleResponses');
+                    const responsesSection = document.getElementById('responsesSection');
+                    const toggleIcon = document.getElementById('toggleIcon');
+
+                    toggleBtn.addEventListener('click', () => {
+                        const isHidden = responsesSection.classList.toggle('hidden');
+                        toggleIcon.innerText = isHidden ? '▼' : '▲';
+                        if (!isHidden) loadMyResponses();
+                    });
+
+                    // Load existing feedbacks
+                    async function loadMyResponses() {
+                        const result = await API.getStats();
+                        if (result.status === 'success') {
+                            const myFeedback = result.data.feedback.filter(f => f.student_id === user.id);
+                            const container = document.getElementById('responseList');
+
+                            if (myFeedback.length === 0) {
+                                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 20px 0;">You haven\'t submitted any feedback yet.</p>';
+                                return;
+                            }
+
+                            const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+                            container.innerHTML = myFeedback.map(f => `
+                    <div class="response-card">
+                        <div class="response-card-header">
+                            <span class="response-subject-badge">${f.subject} · ${f.teacher || ''}</span>
+                            <span class="response-date">${new Date(f.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div style="color:#f59e0b;font-size:0.9rem;margin-bottom:6px;">${stars(f.rating || 0)}</div>
+                        <p class="response-comment">"${f.comments || 'No comment'}"</p>
+                        ${f.admin_response ? `
+                            <div class="admin-reply">
+                                <div class="admin-reply-label">Faculty Response</div>
+                                <div class="admin-reply-text">${f.admin_response}</div>
+                            </div>
+                        ` : `<div class="awaiting-text">⏳ Awaiting faculty response...</div>`}
+                    </div>
+                `).join('');
+                        }
+                    }
+
+                    // Bottom nav
+                    document.getElementById('navFeedback').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setNavActive('navFeedback');
+                    });
+
+                    document.getElementById('navHistory').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.getElementById('responsesContainer').scrollIntoView({ behavior: 'smooth' });
+                        if (responsesSection.classList.contains('hidden')) toggleBtn.click();
+                        setNavActive('navHistory');
+                    });
+
+                    document.getElementById('navLogout').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.getElementById('logoutBtn').click();
+                    });
+
+                    function setNavActive(id) {
+                        document.querySelectorAll('.bottom-nav-item').forEach(i => i.classList.remove('active'));
+                        document.getElementById(id).classList.add('active');
+                    }
+
+                    // Form submit
+                    document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const btn = document.getElementById('submitBtn');
+                        const statusMsg = document.getElementById('statusMsg');
+
+                        btn.disabled = true;
+                        btn.innerText = 'Submitting...';
+                        statusMsg.classList.add('hidden');
+
+                        const ratingInput = document.querySelector('input[name="rating"]:checked');
+                        const feedbackData = {
+                            student_id: user.id,
+                            student_name: document.getElementById('studentName').value,
+                            roll_no: document.getElementById('rollNo').value,
+                            phone_number: document.getElementById('phoneNumber').value,
+                            subject: document.getElementById('subject').value,
+                            teacher: document.getElementById('teacher').value,
+                            rating: ratingInput ? parseInt(ratingInput.value) : 3,
+                            comments: document.getElementById('comments').value
+                        };
+
+                        const result = await API.submitFeedback(feedbackData);
+
+                        if (result.status === 'success') {
+                            statusMsg.innerText = '✨ Feedback submitted successfully!';
+                            statusMsg.style.color = '#10b981';
+                            statusMsg.style.background = '#ecfdf5';
+                            statusMsg.classList.remove('hidden');
+                            document.getElementById('feedbackForm').reset();
+                            if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+                            loadMyResponses();
+                        } else {
+                            statusMsg.innerText = '❌ Error: ' + result.message;
+                            statusMsg.style.color = '#ef4444';
+                            statusMsg.style.background = '#fef2f2';
+                            statusMsg.classList.remove('hidden');
+                        }
+
+                        btn.disabled = false;
+                        btn.innerText = '✓ Submit Feedback';
+                    });
+
+                    document.getElementById('logoutBtn').addEventListener('click', () => {
+                        localStorage.removeItem('user');
+                        window.location.href = 'index.html';
+                    });
+
+                    // Init
+                    loadMyResponses();
+                </script>
+            </div><!-- /app-scroll -->
+        </div><!-- /phone-screen -->
+    </div><!-- /phone-shell -->
+
+    <div class="phone-label">
+        <div class="phone-label-badge">📱 Mobile App</div>
+        <h2>Submit<br>Feedback</h2>
+        <p>Rate your faculty, leave comments, and track your submission history in one place.</p>
+    </div>
+</body>
+
+</html>
