@@ -1,0 +1,21 @@
+# Environment Variables
+.env
+backend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+backend/__pycache__/
+
+# Logs and temporary files
+*.log
+schema_output.txt
+users_list.txt
+backend/all_users.txt
+backend/schema_output.txt
+backend/*.txt
+
+# OS files
+.DS_Store
+Thumbs.db
