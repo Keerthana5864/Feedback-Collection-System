@@ -5,7 +5,7 @@ const isLocal = window.location.hostname === '127.0.0.1' ||
 
 const API_URL = isLocal
     ? 'http://127.0.0.1:5000/api'
-    : 'https://your-backend-url.onrender.com/api'; // Replace with your actual Render URL after deployment
+    : 'https://feedback-collection-system-iyia.onrender.com/api';
 
 const API = {
     // Accepts: API.login({email, password, institution_id}) OR API.login(email, password, institution_id)
