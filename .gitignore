@@ -15,6 +15,7 @@ users_list.txt
 backend/all_users.txt
 backend/schema_output.txt
 backend/*.txt
+!backend/requirements.txt
 
 # OS files
 .DS_Store

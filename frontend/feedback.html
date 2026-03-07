@@ -515,12 +515,14 @@
                     // Bottom nav
                     document.getElementById('navFeedback').addEventListener('click', (e) => {
                         e.preventDefault();
+                        if (navigator.vibrate) navigator.vibrate(15);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         setNavActive('navFeedback');
                     });
 
                     document.getElementById('navHistory').addEventListener('click', (e) => {
                         e.preventDefault();
+                        if (navigator.vibrate) navigator.vibrate(15);
                         document.getElementById('responsesContainer').scrollIntoView({ behavior: 'smooth' });
                         if (responsesSection.classList.contains('hidden')) toggleBtn.click();
                         setNavActive('navHistory');
@@ -528,6 +530,7 @@
 
                     document.getElementById('navLogout').addEventListener('click', (e) => {
                         e.preventDefault();
+                        if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
                         document.getElementById('logoutBtn').click();
                     });
 

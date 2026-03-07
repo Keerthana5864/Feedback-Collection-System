@@ -385,6 +385,8 @@ button {
     box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
     position: relative;
     overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 button:hover:not(:disabled) {
@@ -393,7 +395,8 @@ button:hover:not(:disabled) {
 }
 
 button:active:not(:disabled) {
-    transform: translateY(0);
+    transform: scale(0.96);
+    opacity: 0.9;
 }
 
 button:disabled {
@@ -542,6 +545,9 @@ button:disabled {
     padding: 6px 4px;
     transition: color 0.2s;
     position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .bottom-nav-item::before {
