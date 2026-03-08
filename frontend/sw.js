@@ -1,4 +1,4 @@
-const CACHE_NAME = 'feedback-system-v5';
+const CACHE_NAME = 'feedback-system-v6';
 const ASSETS = [
     './',
     'index.html',
