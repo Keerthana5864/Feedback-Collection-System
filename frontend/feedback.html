@@ -22,6 +22,14 @@
             background: var(--bg-body-gradient);
         }
 
+        /* On mobile the phone-shell becomes full-screen via global CSS,
+           so the feedback-page just needs to scroll nicely inside app-scroll */
+        @media screen and (max-width: 520px) {
+            body {
+                background: var(--phone-screen-bg) !important;
+            }
+        }
+
         .feedback-page {
             max-width: 600px;
             margin: 0 auto;
